@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment — keep secrets out of git (but track the example)
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #07060d;
+  color: #f6f5ff;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@media (pointer: fine) {
+  body,
+  a,
+  button,
+  input,
+  textarea {
+    cursor: none;
+  }
+}
+
+::selection {
+  background: #ff3d8b;
+  color: #07060d;
+}
+
+:focus-visible {
+  outline: 2px solid #ff3d8b;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #07060d;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#ff3d8b, #9b5cff);
+  border-radius: 999px;
+}
+
+/* ---- helpers --------------------------------------------------------- */
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* animated rainbow text */
+.text-grad {
+  background: linear-gradient(90deg, #ff3d8b, #9b5cff, #25e6d6, #4d7cff, #ff3d8b);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient 8s ease infinite;
+}
+
+/* animated gradient surface (buttons / bars) */
+.bg-grad {
+  background: linear-gradient(90deg, #ff3d8b, #9b5cff, #4d7cff, #25e6d6, #ff3d8b);
+  background-size: 250% auto;
+  animation: gradient 8s ease infinite;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rule {
+  border-color: rgba(246, 245, 255, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
