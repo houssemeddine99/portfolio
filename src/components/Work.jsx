@@ -1,8 +1,19 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Share2, Check, Star } from 'lucide-react'
 import { getFeaturedProjects, getSharedProjects, LANG_COLORS } from '../lib/github.js'
+import { ActiveContext } from '../lib/tunnelContext.js'
 
-// A compact project tile (pops in as part of a .stagger-pop grid).
+// Empty first (delayChildren), then each card springs in one-by-one (staggerChildren).
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.14, delayChildren: 0.3 } },
+}
+const item = {
+  hidden: { opacity: 0, scale: 0.4, y: 26 },
+  show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 480, damping: 17 } },
+}
+
 function Tile({ p, i }) {
   const [copied, setCopied] = useState(false)
   const color = LANG_COLORS[p.tags?.[0]] || '#a3a0bf'
@@ -28,7 +39,7 @@ function Tile({ p, i }) {
     <Tag
       {...(p.url ? { href: p.url, target: '_blank', rel: 'noreferrer' } : {})}
       data-cursor={p.url ? 'VIEW' : 'true'}
-      className="group flex flex-col rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:-translate-y-0.5 hover:border-pink/50 hover:bg-white/[0.08]"
+      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:-translate-y-0.5 hover:border-pink/50 hover:bg-white/[0.08]"
     >
       <div className="flex items-center justify-between">
         <span className="font-mono text-[11px] text-haze">{String(i + 1).padStart(2, '0')}</span>
@@ -65,41 +76,54 @@ function Tile({ p, i }) {
   )
 }
 
-// Screen: your own projects, popping in one by one.
-export default function ProjectsGrid() {
-  const projects = getFeaturedProjects()
+function Grid({ items, eyebrow, title, accent, sub }) {
+  const active = useContext(ActiveContext)
   return (
     <div className="flex h-full flex-col justify-center">
-      <span className="eyebrow text-pink">02 — work</span>
+      <span className="eyebrow text-pink">{eyebrow}</span>
       <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-        Selected <span className="text-grad">projects</span>
+        {title} <span className="text-grad">{accent}</span>
       </h2>
-      <p className="mt-2 text-sm text-haze">Straight from my GitHub.</p>
-      <div className="stagger-pop mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {projects.map((p, i) => (
-          <Tile key={p.name} p={p} i={i} />
+      {sub && <p className="mt-2 text-sm text-haze">{sub}</p>}
+
+      <motion.div
+        className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2"
+        variants={container}
+        initial="hidden"
+        animate={active ? 'show' : 'hidden'}
+      >
+        {items.map((p, i) => (
+          <motion.div key={p.full_name || p.name} variants={item}>
+            <Tile p={p} i={i} />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   )
 }
 
-// Screen: team / shared projects, popping in one by one.
+export default function ProjectsGrid() {
+  return (
+    <Grid
+      items={getFeaturedProjects()}
+      eyebrow="02 — work"
+      title="Selected"
+      accent="projects"
+      sub="Straight from my GitHub."
+    />
+  )
+}
+
 export function SharedGrid() {
   const shared = getSharedProjects()
   if (!shared.length) return null
   return (
-    <div className="flex h-full flex-col justify-center">
-      <span className="eyebrow text-pink">collaborations</span>
-      <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-        Built <span className="text-grad">with teams</span>
-      </h2>
-      <p className="mt-2 text-sm text-haze">{shared.length} projects I've contributed to with teammates.</p>
-      <div className="stagger-pop mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {shared.map((p, i) => (
-          <Tile key={p.full_name} p={p} i={i} />
-        ))}
-      </div>
-    </div>
+    <Grid
+      items={shared}
+      eyebrow="collaborations"
+      title="Built"
+      accent="with teams"
+      sub={`${shared.length} projects I've contributed to with teammates.`}
+    />
   )
 }

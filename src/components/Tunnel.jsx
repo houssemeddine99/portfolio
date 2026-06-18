@@ -2,6 +2,7 @@ import { Children, useEffect, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import { gsap, ScrollTrigger } from '../lib/scroll.js'
 import { BorderBeam } from './ui/border-beam.jsx'
+import { ActiveContext } from '../lib/tunnelContext.js'
 
 // Fly THROUGH a 3D world: the camera moves forward along Z as you scroll, so
 // each section rushes toward you from the depth, grows to full size as you
@@ -15,6 +16,7 @@ export default function Tunnel({ children }) {
   const items = Children.toArray(children)
   const N = Math.max(items.length, 1)
   const [reduced, setReduced] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -24,18 +26,29 @@ export default function Tunnel({ children }) {
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       const sections = gsap.utils.toArray('.fly-section', world.current)
+      let lastActive = -1
 
       const apply = (z) => {
         world.current.style.transform = `translateZ(${z}px)`
+        let nearest = 0
+        let nearestDist = Infinity
         sections.forEach((el, i) => {
           const dist = Math.abs(z - i * GAP)
+          if (dist < nearestDist) {
+            nearestDist = dist
+            nearest = i
+          }
           const op = Math.max(0, 1 - dist / FADE)
           el.style.opacity = op
           el.style.visibility = op < 0.01 ? 'hidden' : 'visible'
           el.style.pointerEvents = dist < GAP * 0.45 ? 'auto' : 'none'
-          // mark the section you've arrived at → triggers staggered pop-ins
-          el.classList.toggle('fly-active', dist < GAP * 0.35)
         })
+        // the screen is "active" only once you've nearly landed on it
+        const next = nearestDist < GAP * 0.4 ? nearest : -1
+        if (next !== lastActive) {
+          lastActive = next
+          setActiveIndex(next)
+        }
       }
       apply(0)
 
@@ -66,9 +79,7 @@ export default function Tunnel({ children }) {
     return (
       <div className="flex flex-col items-center gap-10 px-5 py-28">
         {items.map((c, i) => (
-          <div key={i} className="fly-active">
-            <Frame child={c} />
-          </div>
+          <Frame key={i} child={c} active />
         ))}
       </div>
     )
@@ -84,7 +95,7 @@ export default function Tunnel({ children }) {
               className="fly-section absolute inset-0 grid place-items-center"
               style={{ transform: `translateZ(${-i * GAP}px)` }}
             >
-              <Frame child={child} />
+              <Frame child={child} active={i === activeIndex} />
             </div>
           ))}
         </div>
@@ -99,7 +110,7 @@ export default function Tunnel({ children }) {
 }
 
 // A premium card: glass + traveling BorderBeam + a glow that follows the cursor.
-function Frame({ child }) {
+function Frame({ child, active }) {
   const [pos, setPos] = useState({ x: -400, y: -400 })
   const [on, setOn] = useState(false)
   return (
@@ -120,7 +131,9 @@ function Frame({ child }) {
             background: `radial-gradient(340px circle at ${pos.x}px ${pos.y}px, rgba(255,61,139,0.18), transparent 65%)`,
           }}
         />
-        <div className="relative z-10 max-h-[80vh] overflow-y-auto p-8">{child}</div>
+        <div className="relative z-10 max-h-[80vh] overflow-y-auto p-8">
+          <ActiveContext.Provider value={!!active}>{child}</ActiveContext.Provider>
+        </div>
         <BorderBeam duration={10} />
       </div>
     </div>
