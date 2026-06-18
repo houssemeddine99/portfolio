@@ -79,7 +79,9 @@ export default function Tunnel({ children }) {
     return (
       <div className="flex flex-col items-center gap-10 px-5 py-28">
         {items.map((c, i) => (
-          <Frame key={i} child={c} active />
+          <ActiveContext.Provider key={i} value={true}>
+            {c?.type?.fullBleed ? <div className="w-full max-w-6xl">{c}</div> : <Frame child={c} />}
+          </ActiveContext.Provider>
         ))}
       </div>
     )
@@ -89,15 +91,20 @@ export default function Tunnel({ children }) {
     <div ref={wrap} className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0" style={{ perspective: '1000px' }}>
         <div ref={world} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          {items.map((child, i) => (
-            <div
-              key={i}
-              className="fly-section absolute inset-0 grid place-items-center"
-              style={{ transform: `translateZ(${-i * GAP}px)` }}
-            >
-              <Frame child={child} active={i === activeIndex} />
-            </div>
-          ))}
+          {items.map((child, i) => {
+            const full = child?.type?.fullBleed
+            return (
+              <div
+                key={i}
+                className="fly-section absolute inset-0 grid place-items-center"
+                style={{ transform: `translateZ(${-i * GAP}px)` }}
+              >
+                <ActiveContext.Provider value={i === activeIndex}>
+                  {full ? child : <Frame child={child} />}
+                </ActiveContext.Provider>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -110,7 +117,7 @@ export default function Tunnel({ children }) {
 }
 
 // A premium card: glass + traveling BorderBeam + a glow that follows the cursor.
-function Frame({ child, active }) {
+function Frame({ child }) {
   const [pos, setPos] = useState({ x: -400, y: -400 })
   const [on, setOn] = useState(false)
   return (
@@ -131,9 +138,7 @@ function Frame({ child, active }) {
             background: `radial-gradient(340px circle at ${pos.x}px ${pos.y}px, rgba(255,61,139,0.18), transparent 65%)`,
           }}
         />
-        <div className="relative z-10 max-h-[80vh] overflow-y-auto p-8">
-          <ActiveContext.Provider value={!!active}>{child}</ActiveContext.Provider>
-        </div>
+        <div className="relative z-10 max-h-[80vh] overflow-y-auto p-8">{child}</div>
         <BorderBeam duration={10} />
       </div>
     </div>

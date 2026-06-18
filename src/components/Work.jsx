@@ -76,28 +76,36 @@ function Tile({ p, i }) {
   )
 }
 
-function Grid({ items, eyebrow, title, accent, sub }) {
+// Free in the open space — no box. A wide spread of cards across the screen
+// that pop in one-by-one. Cards alternate a vertical offset so it feels loose.
+function Grid({ items, eyebrow, title, accent, sub, cols }) {
   const active = useContext(ActiveContext)
   return (
-    <div className="flex h-full flex-col justify-center">
-      <span className="eyebrow text-pink">{eyebrow}</span>
-      <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-        {title} <span className="text-grad">{accent}</span>
-      </h2>
-      {sub && <p className="mt-2 text-sm text-haze">{sub}</p>}
+    <div className="w-full px-6 sm:px-12">
+      <div className="mx-auto max-w-6xl">
+        <span className="eyebrow text-pink">{eyebrow}</span>
+        <h2 className="mt-2 text-4xl font-extrabold sm:text-5xl">
+          {title} <span className="text-grad">{accent}</span>
+        </h2>
+        {sub && <p className="mt-2 text-haze">{sub}</p>}
 
-      <motion.div
-        className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2"
-        variants={container}
-        initial="hidden"
-        animate={active ? 'show' : 'hidden'}
-      >
-        {items.map((p, i) => (
-          <motion.div key={p.full_name || p.name} variants={item}>
-            <Tile p={p} i={i} />
-          </motion.div>
-        ))}
-      </motion.div>
+        <motion.div
+          className={`mt-8 grid gap-4 sm:gap-5 ${cols}`}
+          variants={container}
+          initial="hidden"
+          animate={active ? 'show' : 'hidden'}
+        >
+          {items.map((p, i) => (
+            <motion.div
+              key={p.full_name || p.name}
+              variants={item}
+              className={i % 2 === 1 ? 'sm:mt-8' : ''}
+            >
+              <Tile p={p} i={i} />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
     </div>
   )
 }
@@ -110,9 +118,11 @@ export default function ProjectsGrid() {
       title="Selected"
       accent="projects"
       sub="Straight from my GitHub."
+      cols="grid-cols-2 sm:grid-cols-3"
     />
   )
 }
+ProjectsGrid.fullBleed = true
 
 export function SharedGrid() {
   const shared = getSharedProjects()
@@ -124,6 +134,8 @@ export function SharedGrid() {
       title="Built"
       accent="with teams"
       sub={`${shared.length} projects I've contributed to with teammates.`}
+      cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
     />
   )
 }
+SharedGrid.fullBleed = true
