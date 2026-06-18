@@ -33,6 +33,8 @@ export default function Tunnel({ children }) {
           el.style.opacity = op
           el.style.visibility = op < 0.01 ? 'hidden' : 'visible'
           el.style.pointerEvents = dist < GAP * 0.45 ? 'auto' : 'none'
+          // mark the section you've arrived at → triggers staggered pop-ins
+          el.classList.toggle('fly-active', dist < GAP * 0.35)
         })
       }
       apply(0)
@@ -64,7 +66,9 @@ export default function Tunnel({ children }) {
     return (
       <div className="flex flex-col items-center gap-10 px-5 py-28">
         {items.map((c, i) => (
-          <Frame key={i} child={c} />
+          <div key={i} className="fly-active">
+            <Frame child={c} />
+          </div>
         ))}
       </div>
     )

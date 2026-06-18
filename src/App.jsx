@@ -8,16 +8,11 @@ import Tunnel from './components/Tunnel.jsx'
 import Hero from './components/Hero.jsx'
 import About from './components/About.jsx'
 import Stats from './components/Stats.jsx'
-import WorkIntro, { ProjectCard } from './components/Work.jsx'
+import ProjectsGrid, { SharedGrid } from './components/Work.jsx'
 import GitHubSection from './components/GitHubSection.jsx'
-import CollabIntro from './components/SharedProjects.jsx'
 import Contact from './components/Contact.jsx'
 import CompanionDock from './components/CompanionDock.jsx'
-import { getFeaturedProjects, getSharedProjects } from './lib/github.js'
 import { initScroll } from './lib/scroll.js'
-
-const projects = getFeaturedProjects()
-const shared = getSharedProjects()
 
 export default function App() {
   useEffect(() => {
@@ -36,14 +31,8 @@ export default function App() {
         <Hero />
         <About />
         <Stats />
-        <WorkIntro />
-        {projects.map((p, i) => (
-          <ProjectCard key={p.name} p={p} i={i} />
-        ))}
-        {shared.length > 0 && <CollabIntro />}
-        {shared.map((p, i) => (
-          <ProjectCard key={p.full_name} p={p} i={i} />
-        ))}
+        <ProjectsGrid />
+        <SharedGrid />
         <GitHubSection />
         <Contact />
       </Tunnel>
